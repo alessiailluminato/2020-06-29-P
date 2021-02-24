@@ -5,8 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import it.polito.tdp.PremierLeague.model.Action;
+import it.polito.tdp.PremierLeague.model.Adiacenza;
 import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Player;
 
@@ -88,5 +90,54 @@ public class PremierLeagueDAO {
 			return null;
 		}
 	}
+	public List<Integer>getMesi(){
+		String sql="SELECT DISTINCT MONTH(DATE) AS mese " + 
+				"FROM matches ";
+		
+		List<Integer>mesi= new LinkedList<Integer>();
+		Connection conn = DBConnect.getConnection();
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				mesi.add(res.getInt("mesi"));
+			}
+			conn.close();
+			return mesi;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public List<Adiacenza> getAdiacenze(Integer minuti, Integer mesi) {
+		String sql=" SELECT a1.MatchID as p1 ,a2.MatchID as p2 ,COUNT(DISTINCT a1.PlayerID) AS peso"+ 
+				"FROM matches AS m1,actions a1 ,actions a2 " + 
+				"WHERE  a1.MatchID!=a2.MatchID " + 
+				"AND a1.PlayerID!=a2.PlayerID " + 
+				"AND a1.TimePlayed=? " + 
+				"AND MONTH(DATE)=? " ;
+		List<Adiacenza> adiacenze = new ArrayList<Adiacenza>();
+		
+		Connection conn = DBConnect.getConnection();
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1,minuti);
+			st.setInt(2, mesi);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				adiacenze.add(new Adiacenza(res.getInt("p1"), res.getInt("a2"), res.getInt("peso")));
+			}
+			conn.close();
+			return adiacenze;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}}}
 	
-}
+
+
+
+

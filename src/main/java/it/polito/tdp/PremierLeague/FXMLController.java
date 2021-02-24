@@ -5,9 +5,10 @@
 package it.polito.tdp.PremierLeague;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.PremierLeague.model.Arco;
 import it.polito.tdp.PremierLeague.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -39,7 +40,7 @@ public class FXMLController {
     private TextField txtMinuti; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbMese"
-    private ComboBox<?> cmbMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> cmbMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbM1"
     private ComboBox<?> cmbM1; // Value injected by FXMLLoader
@@ -57,8 +58,41 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	//inserisco valore
+    	Integer minuti = null;
+    	try {
+    		minuti = Integer.parseInt(txtMinuti.getText());
+    	} catch (NumberFormatException e) {
+    		txtResult.appendText("Inserire un numero minimo di minuti nel formato corretto");
+    		return;
+    	}
+//Seleziono mesi tendina 
+    	Integer mesi = (Integer) cmbMese.getValue();
+    	if(mesi == null) {
+    		txtResult.appendText("Seleziona mese!");
+    		return ;
+    	}
+    
+		this.model.creaGrafo(minuti,mesi);
+    	txtResult.appendText("Grafo creato\n");
+    	txtResult.appendText("# VERTICI: " + this.model.vertici() + "\n");
+    	txtResult.appendText("# ARCHI: " + this.model.archi());
+     
+	}
+
     	
-    }
+    void doConnessioneMax(ActionEvent event) {
+	    //stampo archi 
+txtResult.clear();
+	    
+	    	List<Arco> archi = this.model.getArchi();
+    	txtResult.appendText("ARCHI: \n\n");
+    	for(Arco ar : archi) {
+    		txtResult.appendText(ar.toString() + "\n");
+
+}}
+
+
 
     @FXML
     void doCollegamento(ActionEvent event) {
@@ -79,7 +113,7 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
-  
+    	this.cmbMese.getItems().addAll(this.model.getMesi()) ;
     }
     
     
